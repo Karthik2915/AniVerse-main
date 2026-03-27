@@ -1,0 +1,9 @@
+#root {
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(135deg, #f2de9f, #202216);
+}
+
+.outline-text {
+  -webkit-text-stroke: 1px white;
+}
