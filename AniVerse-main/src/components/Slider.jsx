@@ -1,158 +1,156 @@
 "use client";
-
 import { useState, useEffect, useCallback, useContext } from "react";
-import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
 import ShopContext from "../context/ShopContext";
-import SliderSkeleton from "./SliderSkeleton";
 
-const ProductDetails = ({ product }) => {
-  if (!product) return null;
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.3, duration: 0.8, ease: "easeInOut" }}
-      className="absolute bottom-6 left-4 md:bottom-12 md:left-8 flex flex-col gap-3 text-white"
-    >
-      <h3 className="text-[#f2de9b] font-bold text-lg md:text-2xl">
-        {product.title}
-      </h3>
-      <p className="text-gray-300 text-sm md:text-lg">
-        <b>Genre:</b> {product.genre?.join(", ") || "N/A"}
-      </p>
-      <motion.a
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.5, duration: 0.6 }}
-        href={product.link}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="bg-[#9ca081] text-black px-4 py-2 md:px-6 md:py-2 rounded-lg hover:bg-[#b1b88f] transition-all text-sm md:text-lg w-max"
-      >
-        More Info
-      </motion.a>
-    </motion.div>
-  );
-};
+const SliderSkeleton = () => (
+  <div className="w-full h-[580px] skeleton relative overflow-hidden">
+    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+    <div className="absolute bottom-12 left-8 space-y-3">
+      <div className="h-10 w-72 skeleton rounded-lg" />
+      <div className="h-4 w-56 skeleton rounded" />
+      <div className="h-10 w-32 skeleton rounded-lg mt-4" />
+    </div>
+  </div>
+);
 
 export default function Slider() {
   const { products } = useContext(ShopContext);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [current, setCurrent] = useState(0);
+  const [auto, setAuto] = useState(true);
   const [loading, setLoading] = useState(true);
+  const [direction, setDirection] = useState(1);
+
+  const items = Array.isArray(products) ? products.slice(0, 12) : [];
+
+  useEffect(() => { setTimeout(() => setLoading(false), 1800); }, []);
+
+  const go = useCallback((dir) => {
+    setDirection(dir);
+    setCurrent(p => (p + dir + items.length) % items.length);
+  }, [items.length]);
 
   useEffect(() => {
-    // Simulate loading for 2 seconds to ensure smooth skeleton animation
-    setTimeout(() => setLoading(false), 2000);
-  }, []);
+    if (!auto || items.length === 0) return;
+    const t = setInterval(() => go(1), 4000);
+    return () => clearInterval(t);
+  }, [auto, go, items.length]);
 
-  // Ensure products is not undefined and has items
-  const firstTenProducts = Array.isArray(products) ? products.slice(0, 10) : [];
+  if (loading) return <SliderSkeleton />;
+  if (items.length === 0) return null;
 
-  const nextSlide = useCallback(() => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % firstTenProducts.length);
-  }, [firstTenProducts.length]);
+  const variants = {
+    enter: (dir) => ({ x: dir > 0 ? "100%" : "-100%", opacity: 0 }),
+    center: { x: 0, opacity: 1, transition: { duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] } },
+    exit: (dir) => ({ x: dir > 0 ? "-100%" : "100%", opacity: 0, transition: { duration: 0.5, ease: "easeIn" } }),
+  };
 
-  const prevSlide = useCallback(() => {
-    setCurrentIndex(
-      (prevIndex) =>
-        (prevIndex - 1 + firstTenProducts.length) % firstTenProducts.length
-    );
-  }, [firstTenProducts.length]);
-
-  useEffect(() => {
-    if (!isAutoPlaying || firstTenProducts.length === 0) return;
-
-    const interval = setInterval(() => {
-      nextSlide();
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, [isAutoPlaying, nextSlide, firstTenProducts.length]);
-
-  if (loading) {
-    return <SliderSkeleton />;
-  }
-
-  // If no products available
-  if (firstTenProducts.length === 0) {
-    return (
-      <div className="text-center p-10 text-gray-500 text-xl">
-        No products available
-      </div>
-    );
-  }
+  const product = items[current];
 
   return (
     <div
-      className="relative w-full h-[540px] max-w-8xl mb-28 overflow-hidden shadow-lg"
-      onMouseEnter={() => setIsAutoPlaying(false)}
-      onMouseLeave={() => setIsAutoPlaying(true)}
+      className="relative w-full h-[580px] overflow-hidden bg-[#0d0a14]"
+      onMouseEnter={() => setAuto(false)}
+      onMouseLeave={() => setAuto(true)}
     >
-      <div
-        className="flex transition-transform duration-500 ease-in-out"
-        style={{ transform: `translateX(-${currentIndex * 100}%)` }}
-      >
-        {firstTenProducts.map((product, index) => (
-          <div
-            key={index}
-            className="w-full h-[540px] md:h-[540px] flex-shrink-0 relative"
-          >
-            <div className="relative w-full h-full">
-              <img
-                src={product.img_url}
-                alt={product.title}
-                className="object-cover w-full h-[540px] opacity-60"
-              />
-              <div
-                className="absolute inset-0"
-                style={{
-                  background:
-                    "radial-gradient(circle, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.8) 100%)",
-                }}
-              />
-            </div>
-            <motion.h3
-              initial={{ opacity: 0, x: -20, y: -20 }}
-              animate={{ opacity: 1, x: 0, y: 0 }}
-              transition={{ duration: 0.8, ease: "easeInOut" }}
-              className="absolute top-4 left-4 md:top-8 md:left-8 text-2xl md:text-4xl text-[#f2de9b] font-bold"
+      <AnimatePresence custom={direction} mode="popLayout">
+        <motion.div
+          key={current}
+          custom={direction}
+          variants={variants}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          className="absolute inset-0"
+        >
+          <img
+            src={product.img_url}
+            alt={product.title}
+            className="w-full h-full object-cover"
+          />
+          {/* Overlays */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/20" />
+
+          {/* Content */}
+          <div className="absolute inset-0 flex flex-col justify-end pb-14 pl-6 md:pl-12">
+            <motion.div
+              initial={{ y: 40, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.2, duration: 0.6 }}
             >
-              {product.title}
-            </motion.h3>
-            <ProductDetails product={product} />
+              {/* Badge */}
+              <div className="flex items-center gap-2 mb-3">
+                <span className="px-3 py-1 bg-purple-500/20 border border-purple-500/30 text-purple-200 text-xs font-semibold rounded-full backdrop-blur-sm">
+                  #{current + 1} Featured
+                </span>
+                {product.score && (
+                  <span className="px-3 py-1 bg-yellow-500/20 border border-yellow-500/30 text-yellow-300 text-xs font-semibold rounded-full backdrop-blur-sm">
+                    ★ {product.score}
+                  </span>
+                )}
+              </div>
+
+              <h2 className="text-3xl md:text-5xl font-bold text-white mb-2 max-w-xl leading-tight">
+                {product.title}
+              </h2>
+
+              <p className="text-purple-300/60 text-sm md:text-base mb-5 max-w-lg line-clamp-2">
+                {product.genre?.join(" · ") || ""}
+              </p>
+
+              <motion.a
+                href={product.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-purple-500 text-[#0d0a14] font-bold rounded-xl hover:bg-white transition-all duration-200 text-sm md:text-base"
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.97 }}
+              >
+                More Info <ExternalLink size={16} />
+              </motion.a>
+            </motion.div>
           </div>
-        ))}
-      </div>
+        </motion.div>
+      </AnimatePresence>
 
-      {/* Navigation Buttons */}
-      <button
-        className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full hover:bg-gray-700"
-        onClick={prevSlide}
-      >
-        <ChevronLeft size={24} />
-      </button>
-      <button
-        className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full hover:bg-gray-700"
-        onClick={nextSlide}
-      >
-        <ChevronRight size={24} />
-      </button>
+      {/* Nav buttons */}
+      {[{ dir: -1, icon: <ChevronLeft size={22} />, pos: "left-4" },
+        { dir: 1, icon: <ChevronRight size={22} />, pos: "right-4" }].map(({ dir, icon, pos }) => (
+        <motion.button
+          key={dir}
+          className={`absolute ${pos} top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/40 backdrop-blur-sm border border-white/10 text-white flex items-center justify-center hover:bg-purple-500/20 hover:border-purple-500/40 transition-all`}
+          onClick={() => go(dir)}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+        >
+          {icon}
+        </motion.button>
+      ))}
 
-      {/* Dots Indicator */}
-      <div className="absolute bottom-4 left-10 w-full flex justify-center gap-2">
-        {firstTenProducts.map((_, index) => (
-          <button
-            key={index}
-            className={`h-3 w-3 rounded-full transition-all ${
-              index === currentIndex ? "bg-[#f2de9b]" : "bg-[#9ca081]"
-            }`}
-            onClick={() => setCurrentIndex(index)}
+      {/* Dots */}
+      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2">
+        {items.map((_, i) => (
+          <motion.button
+            key={i}
+            onClick={() => { setDirection(i > current ? 1 : -1); setCurrent(i); }}
+            className={`rounded-full transition-all duration-300 ${i === current ? "bg-purple-500 w-6 h-2" : "bg-white/30 w-2 h-2 hover:bg-white/60"}`}
+            whileHover={{ scale: 1.3 }}
           />
         ))}
       </div>
+
+      {/* Progress bar */}
+      {auto && (
+        <motion.div
+          key={current}
+          className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-purple-300 to-violet-300"
+          initial={{ width: "0%" }}
+          animate={{ width: "100%" }}
+          transition={{ duration: 4, ease: "linear" }}
+        />
+      )}
     </div>
   );
 }

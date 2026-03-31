@@ -1,64 +1,44 @@
 import React, { useContext, useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import ShopContext from "../context/ShopContext";
 
 const MangaGrid = () => {
   const { Manga } = useContext(ShopContext);
-  const [shuffledManga, setShuffledManga] = useState([]);
+  const [shuffled, setShuffled] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (Manga.length > 0) {
-      setLoading(true);
-      // Show 8 items for mobile and 16 items for laptop
-      const itemCount = window.innerWidth < 768 ? 8 : 16;
-      const shuffled = [...Manga]
-        .sort(() => Math.random() - 0.5)
-        .slice(0, itemCount);
-      setTimeout(() => {
-        setShuffledManga(shuffled);
-        setLoading(false);
-      }, 1000);
+      const count = window.innerWidth < 768 ? 8 : 16;
+      const s = [...Manga].sort(() => Math.random() - 0.5).slice(0, count);
+      setTimeout(() => { setShuffled(s); setLoading(false); }, 800);
     }
   }, [Manga]);
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-2">
-      {/* Skeleton Loader */}
       {loading
-        ? Array.from({ length: window.innerWidth < 768 ? 8 : 16 }).map(
-            (_, index) => (
-              <div
-                key={index}
-                className="w-full h-40 md:h-48 bg-gray-200 animate-pulse rounded-lg"
-              ></div>
-            )
-          )
-        : shuffledManga.map((product, index) => (
-            <div
-              key={product.id || index}
-              className="w-full h-40 md:h-48 bg-white rounded-lg shadow-lg overflow-hidden transform transition-transform duration-300 hover:scale-105 hover:shadow-2xl"
-              style={{
-                animationDelay: `${(index % 4) * 0.1}s`,
-                animationDuration: "0.6s",
-              }}
+        ? Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="w-full h-48 skeleton rounded-2xl" />
+          ))
+        : shuffled.map((m, i) => (
+            <motion.div
+              key={m.id || i}
+              className="rounded-2xl overflow-hidden border border-purple-500/10 hover:border-purple-500/30 cursor-pointer group relative"
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: Math.min(i * 0.05, 0.4) }}
+              whileHover={{ y: -4 }}
+              onClick={() => window.open(m.page_url, "_blank")}
             >
-              <a
-                href={product.page_url || "#"}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <div
-                  className="w-full h-full bg-cover bg-center opacity-80 hover:opacity-100 transition-opacity"
-                  style={{ backgroundImage: `url(${product.image_url})` }}
-                >
-                  <div className="w-full h-full flex items-end p-2 bg-gradient-to-t from-black/70 to-transparent">
-                    <h3 className="text-center text-xs sm:text-sm md:text-lg font-bold text-[#f2de9b] bg-black/50 p-1 rounded-md">
-                      {product.Title || `Product ${index + 1}`}
-                    </h3>
-                  </div>
-                </div>
-              </a>
-            </div>
+              <img src={m.image_url} alt={m.Title} loading="lazy"
+                className="w-full h-40 md:h-48 object-cover group-hover:scale-105 transition-transform duration-500" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0f1009] via-transparent to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-2">
+                <p className="text-purple-200 text-xs font-semibold truncate">{m.Title}</p>
+              </div>
+            </motion.div>
           ))}
     </div>
   );

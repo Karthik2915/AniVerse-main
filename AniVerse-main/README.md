@@ -1,5 +1,3 @@
-Deployed link: https://ani-verse-red.vercel.app/
-
 🌸 AniVerse
 
 AniVerse is an interactive anime listing and information platform, providing fans with a well-organized database of anime titles, characters, and manga series. Inspired by popular anime platforms, AniVerse is a go-to hub for anime enthusiasts to explore and track their favorite shows and characters.

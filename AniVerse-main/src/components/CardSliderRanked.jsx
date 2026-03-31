@@ -4,129 +4,74 @@ import ShopContext from "../context/ShopContext";
 import ScrollFloat from "../ReactBits/ScrollText";
 import "../App.css";
 
+const medals = ["🥇", "🥈", "🥉"];
+
 export default function CardSliderRanked() {
   const { products } = useContext(ShopContext);
 
   const items = products
-    .map((product, index) => ({
-      key: `${product.uid}-${index}`,
-      image: product.img_url,
-      name: product.title,
-      rating: product.score,
-      episodes: product.episodes,
-      popular: product.popularity,
-      rank: product.ranked,
-      URL: product.link,
+    .filter(p => p.ranked && p.ranked > 0)
+    .map((p, i) => ({
+      key: `${p.uid}-${i}`,
+      image: p.img_url, name: p.title,
+      rating: p.score, episodes: p.episodes,
+      rank: p.ranked, URL: p.link,
     }))
-    .sort((a, b) => b.rank - a.rank)
-    .slice(0, 15);
-
-  // Mobile limit 6 items, View More shows the rest
-  const visibleItems = items.slice(0, 4);
+    .sort((a, b) => a.rank - b.rank)
+    .slice(0, 10);
 
   return (
-    <div className="bg-[#202216] overflow-hidden relative">
-      {/* Title */}
-      <div className="flex justify-start pl-4 text-[#f2de9b] font-semibold items-start">
-        <ScrollFloat
-          animationDuration={1}
-          ease="back.inOut(2)"
-          scrollStart="center bottom+=50%"
-          scrollEnd="bottom bottom-=40%"
-          stagger={0.03}
-        >
-          Top Ranked
+    <div className="bg-[#0d0a14] py-10 px-4 md:px-8">
+      <div className="text-purple-200 font-bold text-2xl md:text-3xl mb-6 px-2">
+        <ScrollFloat animationDuration={1} ease="back.inOut(2)" scrollStart="center bottom+=50%" scrollEnd="bottom bottom-=40%" stagger={0.03}>
+          🏆 All-Time Ranked
         </ScrollFloat>
       </div>
 
-      {/* Mobile List View | Laptop Card Slider */}
-      <div className="p-4 mb-10">
-        {/* Mobile View: List Layout */}
-        <div className="md:hidden space-y-4">
-          {visibleItems.map((item, index) => (
-            <div
-              key={item.key}
-              className="flex items-center space-x-4 bg-[#202216] text-[#f2de9b] cursor-pointer shadow-lg rounded-lg border border-[#f2de9b] p-2"
-              onClick={() => window.open(item.URL, "_blank")}
-            >
-              {/* Image */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {items.map((item, i) => (
+          <motion.div
+            key={item.key}
+            className="flex gap-4 items-center bg-[#1a1528] border border-purple-500/10 rounded-2xl p-3 cursor-pointer group overflow-hidden relative"
+            initial={{ opacity: 0, x: i % 2 === 0 ? -30 : 30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.5, delay: i * 0.06 }}
+            whileHover={{ scale: 1.02, borderColor: "rgba(242,222,155,0.3)" }}
+            onClick={() => window.open(item.URL, "_blank")}
+          >
+            {/* Rank number bg decoration */}
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[80px] font-black text-purple-200/5 select-none pointer-events-none">
+              {item.rank}
+            </div>
+
+            {/* Rank badge */}
+            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-lg font-bold">
+              {i < 3 ? medals[i] : <span className="text-purple-300/60 text-sm">#{item.rank}</span>}
+            </div>
+
+            {/* Image */}
+            <div className="flex-shrink-0 relative overflow-hidden rounded-xl">
               <img
                 src={item.image}
                 alt={item.name}
-                className="w-20 h-20 object-cover rounded-lg"
+                className="w-14 h-18 object-cover group-hover:scale-110 transition-transform duration-500"
+                style={{ height: "72px" }}
               />
+            </div>
 
-              {/* Content */}
-              <div className="flex-1">
-                {/* Title */}
-                {/* Title */}
-                <h3
-                  className="text-lg font-semibold truncate overflow-hidden whitespace-nowrap max-w-full"
-                  title={item.name}
-                >
-                  {item.name.slice(0, 20) + "..."}
-                </h3>
-
-                {/* Rating */}
-                <div className="flex items-center mt-1">
-                  <span className="text-yellow-400 text-lg">★</span>
-                  <span className="ml-2 text-lg">{item.rating}</span>
-                </div>
-
-                {/* Episodes */}
-                <div className="text-sm bg-[#f2de9b] text-[#202216] rounded-full px-3 py-1 inline-block mt-2">
-                  {item.episodes} Episodes
-                </div>
+            {/* Info */}
+            <div className="flex-1 min-w-0">
+              <h3 className="text-purple-200 font-semibold truncate">{item.name}</h3>
+              <div className="flex items-center gap-3 mt-1">
+                <span className="text-yellow-400 text-sm">★ {item.rating}</span>
+                <span className="text-xs text-purple-300/60 bg-purple-500/10 px-2 py-0.5 rounded-full">
+                  {item.episodes || "?"} eps
+                </span>
               </div>
             </div>
-          ))}
-        </div>
-
-        {/* Laptop View: Cards Layout */}
-        <div className="hidden md:flex no-scrollbar space-x-6 overflow-x-auto overflow-y-clip">
-          {items.map((item, index) => (
-            <div
-              key={item.key}
-              className="w-60 bg-[#202216] text-[#f2de9b] border-[#f2de9b] cursor-pointer shadow-lg rounded-lg overflow-hidden shrink-0 border "
-              onClick={() => window.open(item.URL, "_blank")}
-            >
-              {/* Image */}
-              <img
-                src={item.image}
-                alt={item.name}
-                className="w-full h-40 md:h-60 object-cover"
-              />
-
-              {/* Card Content */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true, amount: 0.5 }}
-                transition={{ duration: 0.3, delay: 0.2 }}
-                className="p-4"
-              >
-                {/* Title */}
-                <h3
-                  className="text-xl font-semibold truncate max-w-full overflow-hidden whitespace-nowrap"
-                  title={item.name}
-                >
-                  {item.name}
-                </h3>
-
-                {/* Rating */}
-                <div className="flex items-center mt-2">
-                  <span className="text-yellow-400 text-lg">★</span>
-                  <span className="ml-2 text-lg">{item.rating}</span>
-                </div>
-
-                {/* Episodes */}
-                <div className="mt-2 text-sm bg-[#f2de9b] text-[#202216] rounded-full px-3 py-1 inline-block">
-                  {item.episodes} Episodes
-                </div>
-              </motion.div>
-            </div>
-          ))}
-        </div>
+          </motion.div>
+        ))}
       </div>
     </div>
   );

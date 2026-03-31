@@ -1,13 +1,12 @@
 import React from "react";
+import { motion } from "framer-motion";
 import MangaSlide from "../components/MangaSlide";
 import Navbar from "../components/Navbar";
-import FallingText from "../ReactBits/FallingText";
 import MangaGrid from "../components/MangaGrid";
 import CardSliderRankedManga from "../components/CardSliderRankedManga";
 import CardSliderRatedManga from "../components/CardSliderRatedManga";
 import Genre from "../components/Genre";
 import MangaTop10 from "../components/MangaTop10";
-import AddComment from "../components/AddComment";
 import Footer from "../components/Footer";
 
 const genres = [
@@ -37,48 +36,48 @@ const genres = [
   { genre: "Supernatural", image: "/supernatural.png" },
   { genre: "Dementia", image: "/dementia.png" },
 ];
+
 const Manga = () => {
-  const handleCommentPost = (comment) => {
-    console.log("New Comment:", comment);
-  };
-
   return (
-    <div>
+    <motion.div
+      className="bg-[#0d0a14] min-h-screen"
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}
+    >
       <Navbar />
-      <div className="bg-[#202216]">
-        <span className="text-2xl blur-text ml-5 mt-10 font-bold flex flex-wrap pt-2 text-[#f2de9f] mb-4">
-          Random Manga's
-        </span>
 
+      {/* Header */}
+      <div className="bg-gradient-to-b from-[#202216] to-[#0f1009] px-6 pt-10 pb-6">
+        <motion.h1
+          className="text-4xl font-black text-purple-200 mb-2"
+          initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
+        >
+          📚 Manga
+        </motion.h1>
+        <p className="text-purple-300/60">Discover top-rated manga from around the world</p>
+      </div>
+
+      {/* Random manga slideshow */}
+      <div className="bg-[#0d0a14] px-4 pb-8">
+        <h2 className="text-xl font-bold text-purple-200 mb-4 px-2">🎲 Random Picks</h2>
         <MangaSlide />
       </div>
-      {/* 
-      <FallingText
-        text={`Top 10 Manga's Of All Time`}
-        highlightWords={["10", "Time"]}
-        highlightClass="highlighted"
-        trigger="hover"
-        backgroundColor="transparent"
-        wireframes={false}
-        gravity={0.56}
-        fontSize="2rem"
-        mouseConstraintStiffness={0.9}
-      /> */}
+
       <MangaTop10 />
       <CardSliderRankedManga />
       <CardSliderRatedManga />
-      <Genre
-        items={genres}
-        onItemSelect={(item, index) => console.log(item, index)}
-        showGradients={true}
-        enableArrowNavigation={true}
-        displayScrollbar={true}
-      />
-      {/* <div className="w-full h-full p-7 lg:p-20">
-        <AddComment onCommentPost={handleCommentPost} />
-      </div>{" "} */}
+
+      <div className="bg-[#0d0a14]">
+        <Genre
+          items={genres}
+          onItemSelect={(item) => console.log(item)}
+          showGradients={true}
+          enableArrowNavigation={true}
+          displayScrollbar={true}
+        />
+      </div>
+
       <Footer />
-    </div>
+    </motion.div>
   );
 };
 

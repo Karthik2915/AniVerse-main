@@ -1,25 +1,19 @@
-const SliderSkeleton = () => {
-  return (
-    <div className="w-full h-[540px] gap-3 mb-28 flex-shrink-0 relative bg-black animate-pulse">
-      {/* Black Screen for Image */}
-      <div className="absolute inset-0 bg-black opacity-60" />
-
-      {/* Title SliderSkeleton */}
-      <div className="absolute top-4 left-4 md:top-8 md:left-8">
-        <div className="w-40 md:w-64 h-6 md:h-10 bg-gray-700 rounded-md animate-pulse" />
-      </div>
-
-      {/* Genre SliderSkeleton */}
-      <div className="absolute bottom-20 left-4 md:bottom-24 md:left-8">
-        <div className="w-60 md:w-80 h-4 bg-gray-700 rounded-md animate-pulse" />
-      </div>
-
-      {/* More Info Button SliderSkeleton */}
-      <div className="absolute bottom-6 left-4 md:bottom-12 md:left-8">
-        <div className="w-28 md:w-40 h-8 bg-gray-700 rounded-lg animate-pulse" />
-      </div>
+const SliderSkeleton = () => (
+  <div className="w-full h-[580px] relative bg-[#0d0a14] animate-pulse overflow-hidden">
+    <div className="absolute inset-0 skeleton" />
+    <div className="absolute top-3 left-3 w-20 h-7 skeleton rounded-full" />
+    <div className="absolute top-3 right-14 w-14 h-7 skeleton rounded-full" />
+    <div className="absolute bottom-20 left-6 md:left-12 space-y-3">
+      <div className="w-16 h-5 skeleton rounded-full" />
+      <div className="w-72 md:w-96 h-10 skeleton rounded-xl" />
+      <div className="w-48 h-4 skeleton rounded" />
+      <div className="w-32 h-11 skeleton rounded-xl mt-2" />
     </div>
-  );
-};
-
+    <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2">
+      {[...Array(6)].map((_, i) => (
+        <div key={i} className={`rounded-full skeleton ${i === 0 ? "w-6 h-2" : "w-2 h-2"}`} />
+      ))}
+    </div>
+  </div>
+);
 export default SliderSkeleton;

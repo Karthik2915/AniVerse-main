@@ -6,7 +6,7 @@ const ProductDetails = (product, index) => {
 
   return (
     <div key={index} style={{ transitionDelay: `${index * 100}ms` }}>
-      <h3 className="text-2xl text-[#9ca081] font-semibold mb-2">
+      <h3 className="text-2xl text-purple-300/60 font-semibold mb-2">
         {product.title}
       </h3>
       <img src={product.img_url} alt={product.title} className="w-40 h-60" />

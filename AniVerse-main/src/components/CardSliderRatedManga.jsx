@@ -1,134 +1,80 @@
-import React, { useContext } from "react";
+import React, { useContext, useRef } from "react";
 import { motion } from "framer-motion";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import ShopContext from "../context/ShopContext";
 import ScrollFloat from "../ReactBits/ScrollText";
 import "../App.css";
 
-export default function CardSliderPopular() {
+export default function CardSliderRatedManga() {
   const { Manga } = useContext(ShopContext);
+  const rowRef = useRef(null);
+  const scroll = (dir) => rowRef.current?.scrollBy({ left: dir * 280, behavior: "smooth" });
 
-  const items = Manga.map((product, index) => ({
-    key: `${product.uid}-${index}`,
-    image: product.image_url,
-    name: product.Title,
-    rating: product.Score,
-    URL: product.page_url,
-    Volumes:
-      product.Volumes == "?"
-        ? "Currently Airing"
-        : product.Volumes + " Volumes",
-    popular: product.popularity,
-    rank: product.ranked,
-  }))
-    .sort((a, b) => b.rating - a.rating)
-    .slice(0, 15);
-
-  // Mobile limit 6 items, View More shows the rest
-  const visibleItems = items.slice(0, 4);
+  const items = Manga.map((p, i) => ({
+    key: `${i}`, image: p.image_url, name: p.Title,
+    rating: p.Score, volumes: p.Volumes === "?" ? "Ongoing" : `${p.Volumes} vol`, URL: p.page_url,
+    rank: p.Rank,
+  })).sort((a, b) => (a.rank || 9999) - (b.rank || 9999)).slice(10, 30);
 
   return (
-    <div className="bg-[#f2de9b] overflow-hidden relative">
-      {/* Title */}
-      <div className="flex justify-start pl-4 text-[#202216] font-semibold items-start">
-        <ScrollFloat
-          animationDuration={1}
-          ease="back.inOut(2)"
-          scrollStart="center bottom+=50%"
-          scrollEnd="bottom bottom-=40%"
-          stagger={0.03}
-        >
-          Top Rated
-        </ScrollFloat>
+    <div className="bg-[#13102 0] py-8">
+      <div className="flex items-center justify-between px-6 mb-4">
+        <div className="text-purple-200 font-bold text-2xl md:text-3xl">
+          <ScrollFloat animationDuration={1} ease="back.inOut(2)" scrollStart="center bottom+=50%" scrollEnd="bottom bottom-=40%" stagger={0.03}>
+            ⭐ Top Rated Manga
+          </ScrollFloat>
+        </div>
+        <div className="hidden md:flex gap-2">
+          {[-1, 1].map(dir => (
+            <motion.button key={dir} onClick={() => scroll(dir)}
+              className="w-9 h-9 rounded-full border border-purple-500/30 text-purple-200 flex items-center justify-center hover:bg-purple-500/10 transition-colors"
+              whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+              {dir < 0 ? <ChevronLeft size={18}/> : <ChevronRight size={18}/>}
+            </motion.button>
+          ))}
+        </div>
       </div>
 
-      {/* Mobile List View | Laptop Card Slider */}
-      <div className="p-4 mb-10">
-        {/* Mobile View: List Layout */}
-        <div className="md:hidden space-y-4">
-          {visibleItems.map((item, index) => (
-            <div
-              key={item.key}
-              className="flex items-center space-x-4 bg-[#f2de9b] text-[#202216] shadow-lg cursor-pointer rounded-lg border border-[#202216] p-2"
-              onClick={() => window.open(item.URL, "_blank")}
-            >
-              {/* Image */}
-              <img
-                src={item.image}
-                alt={item.name}
-                className="w-20 h-20 object-cover rounded-lg"
-              />
-
-              {/* Content */}
-              <div className="flex-1">
-                {/* Title */}
-                {/* Title */}
-                <h3
-                  className="text-lg font-semibold truncate overflow-hidden whitespace-nowrap max-w-full"
-                  title={item.name}
-                >
-                  {item.name.slice(0, 20) + "..."}
-                </h3>
-
-                {/* Rating */}
-                <div className="flex items-center mt-1">
-                  <span className="text-yellow-400 text-lg">★</span>
-                  <span className="ml-2 text-lg">{item.rating}</span>
+      <div ref={rowRef} className="hidden md:flex gap-4 px-6 overflow-x-auto no-scrollbar pb-2">
+        {items.map((item, i) => (
+          <motion.div key={item.key}
+            className="w-48 flex-shrink-0 rounded-2xl overflow-hidden bg-[#1a1528] border border-[#9ca081]/20 cursor-pointer group"
+            initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }} transition={{ delay: Math.min(i * 0.05, 0.5) }}
+            whileHover={{ y: -5, borderColor: "rgba(242,222,155,0.3)" }}
+            onClick={() => window.open(item.URL, "_blank")}>
+            <div className="relative overflow-hidden">
+              <img src={item.image} alt={item.name} loading="lazy"
+                className="w-full h-60 object-cover group-hover:scale-105 transition-transform duration-500" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0f1009] to-transparent" />
+              {item.rating && (
+                <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-sm text-yellow-300 text-xs font-bold px-2 py-0.5 rounded-lg">
+                  ★ {item.rating}
                 </div>
-
-                {/* Volumes */}
-                <div className="text-sm bg-[#f2de9b] text-[#202216] rounded-full px-3 py-1 inline-block mt-2">
-                  {item.Volumes}
-                </div>
-              </div>
+              )}
             </div>
-          ))}
-        </div>
-
-        {/* Laptop View: Cards Layout */}
-        <div className="hidden md:flex no-scrollbar space-x-6 overflow-x-auto overflow-y-clip">
-          {items.map((item, index) => (
-            <div
-              key={item.key}
-              className="w-60 bg-[#f2de9b] text-[#202216] border-[#202216] shadow-lg cursor-pointer rounded-lg overflow-hidden shrink-0 border "
-              onClick={() => window.open(item.URL, "_blank")}
-            >
-              {/* Image */}
-              <img
-                src={item.image}
-                alt={item.name}
-                className="w-full h-40 md:h-60 object-cover"
-              />
-
-              {/* Card Content */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true, amount: 0.5 }}
-                transition={{ duration: 0.3, delay: 0.2 }}
-                className="p-4"
-              >
-                {/* Title */}
-                <h3
-                  className="text-xl font-semibold truncate max-w-full overflow-hidden whitespace-nowrap"
-                  title={item.name}
-                >
-                  {item.name}
-                </h3>
-
-                {/* Rating */}
-                <div className="flex items-center mt-2">
-                  <span className="text-yellow-400 text-lg">★</span>
-                  <span className="ml-2 text-lg">{item.rating}</span>
-                </div>
-
-                {/* Volumes */}
-                <div className="mt-2 text-sm bg-[#202216] text-[#f2de9b] rounded-full px-3 py-1 inline-block">
-                  {item.Volumes}
-                </div>
-              </motion.div>
+            <div className="p-3">
+              <h3 className="text-purple-200 text-sm font-semibold truncate mb-1">{item.name}</h3>
+              <span className="text-xs text-purple-300/60 bg-purple-500/10 px-2 py-0.5 rounded-full">{item.volumes}</span>
             </div>
-          ))}
-        </div>
+          </motion.div>
+        ))}
+      </div>
+
+      <div className="md:hidden grid grid-cols-2 gap-3 px-4">
+        {items.slice(0,4).map((item, i) => (
+          <motion.div key={item.key}
+            className="rounded-xl overflow-hidden bg-[#1a1528] border border-[#9ca081]/20 cursor-pointer"
+            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }} transition={{ delay: i * 0.1 }}
+            onClick={() => window.open(item.URL, "_blank")}>
+            <img src={item.image} alt={item.name} loading="lazy" className="w-full h-36 object-cover" />
+            <div className="p-2">
+              <p className="text-purple-200 text-xs font-semibold truncate">{item.name}</p>
+              <p className="text-purple-300/60 text-[10px]">★ {item.rating}</p>
+            </div>
+          </motion.div>
+        ))}
       </div>
     </div>
   );

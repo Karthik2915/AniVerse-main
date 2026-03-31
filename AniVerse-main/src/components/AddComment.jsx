@@ -11,7 +11,7 @@ export default function AddComment() {
   };
 
   return (
-    <div className="w-full h-[500px] p-6 md:p-10 bg-[#202216]  border border-[#f2de9b] rounded-lg shadow-lg flex flex-col justify-between relative">
+    <div className="w-full h-[500px] p-6 md:p-10 bg-[#1a1528]  border border-[#f2de9b] rounded-lg shadow-lg flex flex-col justify-between relative">
       {/* Background Image */}
       <img
         src="/comment.png" // Replace with your image path
@@ -32,7 +32,7 @@ export default function AddComment() {
         {/* Post Button */}
         <button
           onClick={handlePost}
-          className="w-full md:w-[150px] px-6 py-3 bg-[#f2de9b] text-black font-bold rounded-lg hover:bg-[#b1a06e] transition text-lg"
+          className="w-full md:w-[150px] px-6 py-3 bg-purple-500 text-black font-bold rounded-lg hover:bg-[#b1a06e] transition text-lg"
         >
           Post
         </button>

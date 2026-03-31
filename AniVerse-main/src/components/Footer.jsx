@@ -1,71 +1,45 @@
 import React from "react";
+import { motion } from "framer-motion";
+import { NavLink } from "react-router-dom";
 
 export default function Footer() {
+  const links = [
+    { name: "Anime", to: "/anime" }, { name: "Manga", to: "/manga" },
+    { name: "Characters", to: "/characters" }, { name: "Quotes", to: "/quotes" },
+    { name: "Cards", to: "/cards" }, { name: "Quiz", to: "/quiz" },
+    { name: "Stats", to: "/stats" }, { name: "Fun", to: "/fun" },
+  ];
+
   return (
-    <footer className="px-6 py-4 bg-gradient-to-br from-[#202216] via-[#2c2f23] to-[#4a4d39] text-[#f2de9b] shadow-lg">
-      <div className="flex flex-col md:flex-row items-center justify-between w-full space-y-4 md:space-y-0">
-        {/* Logo and Brand Name */}
-        <div className="flex items-center gap-2 text-xl font-bold">
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              fillRule="evenodd"
-              clipRule="evenodd"
-              d="M17.6745 16.9224L12.6233 10.378C12.2167 9.85117 11.4185 9.8611 11.0251 10.3979L6.45728 16.631C6.26893 16.888 5.96935 17.0398 5.65069 17.0398H3.79114C2.9635 17.0398 2.49412 16.0919 2.99583 15.4336L11.0224 4.90319C11.4206 4.38084 12.2056 4.37762 12.608 4.89668L20.9829 15.6987C21.4923 16.3558 21.024 17.3114 20.1926 17.3114H18.4661C18.1562 17.3114 17.8638 17.1677 17.6745 16.9224ZM12.5866 15.5924L14.8956 18.3593C15.439 19.0105 14.976 20 14.1278 20H9.74075C8.9164 20 8.4461 19.0586 8.94116 18.3994L11.0192 15.6325C11.4065 15.1169 12.1734 15.0972 12.5866 15.5924Z"
-              fill="#f2de9b"
-            />
-          </svg>
-          <span>AniVerse</span>
-        </div>
-
-        {/* Copyright Section */}
-        <aside className="text-sm text-center md:text-left">
-          <p>
-            ©2025{" "}
-            <a className="font-medium hover:text-[#b1a06e] transition" href="#">
+    <footer className="bg-[#0d0a14] border-t border-purple-500/10 text-purple-300/50">
+      <div className="max-w-7xl mx-auto px-6 py-10">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+          <motion.div className="flex items-center gap-2.5 text-xl font-black" whileHover={{ scale: 1.05 }}>
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-600 to-violet-500 flex items-center justify-center">
+              <span className="text-white text-sm">✦</span>
+            </div>
+            <span className="bg-gradient-to-r from-purple-300 to-violet-300 bg-clip-text text-transparent">
               AniVerse
-            </a>
-          </p>
-        </aside>
-
-        {/* Social Media Links */}
-        <div className="flex gap-4">
-          <a
-            href="#"
-            className="hover:scale-110 transition-transform"
-            aria-label="Github Link"
-          >
-            <span className="icon-[tabler--brand-github] size-5">Github</span>
-          </a>
-          <a
-            href="#"
-            className="hover:scale-110 transition-transform"
-            aria-label="Facebook Link"
-          >
-            <span className="icon-[tabler--brand-facebook] size-5">
-              Facebook
             </span>
-          </a>
-          <a
-            href="#"
-            className="hover:scale-110 transition-transform"
-            aria-label="X Link"
-          >
-            <span className="icon-[tabler--brand-x] size-5">X</span>
-          </a>
-          <a
-            href="#"
-            className="hover:scale-110 transition-transform"
-            aria-label="Google Link"
-          >
-            <span className="icon-[tabler--brand-google] size-5">Google</span>
-          </a>
+          </motion.div>
+
+          <div className="flex flex-wrap justify-center gap-5">
+            {links.map((l, i) => (
+              <NavLink key={i} to={l.to}
+                className="text-sm hover:text-purple-300 transition-colors duration-200">
+                {l.name}
+              </NavLink>
+            ))}
+          </div>
+
+          <p className="text-sm text-purple-300/30">© 2025 AniVerse ✦</p>
         </div>
+
+        <motion.div
+          className="mt-8 h-px bg-gradient-to-r from-transparent via-purple-500/20 to-transparent"
+          initial={{ scaleX: 0 }} whileInView={{ scaleX: 1 }}
+          viewport={{ once: true }} transition={{ duration: 1.2, ease: "easeOut" }}
+        />
       </div>
     </footer>
   );

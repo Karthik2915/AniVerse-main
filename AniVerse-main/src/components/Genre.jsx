@@ -7,169 +7,113 @@ import AnimeGrid from "./AnimeGrid.jsx";
 import MangaGrid from "./MangaGrid.jsx";
 import ShopContext from "../context/ShopContext.jsx";
 
-const AnimatedItem = ({
-  children,
-  delay = 0,
-  index,
-  onMouseEnter,
-  onClick,
-}) => {
+const AnimatedItem = ({ children, delay = 0, index, onMouseEnter, onClick }) => {
   const ref = useRef(null);
-  const inView = useInView(ref, { amount: 0.5, triggerOnce: false });
-
+  const inView = useInView(ref, { amount: 0.3, triggerOnce: false });
   return (
-    <motion.div
-      ref={ref}
-      data-index={index}
-      onMouseEnter={onMouseEnter}
-      onClick={onClick}
-      initial={{ scale: 0.7, opacity: 0 }}
-      animate={inView ? { scale: 1, opacity: 1 } : { scale: 0.7, opacity: 0 }}
-      transition={{ duration: 0.2, delay }}
-      className="mb-4 cursor-pointer"
+    <motion.div ref={ref} data-index={index} onMouseEnter={onMouseEnter} onClick={onClick}
+      initial={{ scale: 0.85, opacity: 0 }}
+      animate={inView ? { scale: 1, opacity: 1 } : { scale: 0.85, opacity: 0 }}
+      transition={{ duration: 0.25, delay }}
+      className="mb-3 cursor-pointer"
     >
       {children}
     </motion.div>
   );
 };
 
-const AnimatedList = ({
-  items = [],
-  onItemSelect,
-  showGradients = true,
-  enableArrowNavigation = true,
-  className = "",
-  itemClassName = "",
-  displayScrollbar = false,
-  initialSelectedIndex = -1,
-}) => {
+const AnimatedList = ({ items = [], onItemSelect, showGradients = true, enableArrowNavigation = true, className = "", displayScrollbar = false }) => {
   const location = useLocation();
   const listRef = useRef(null);
-  const [selectedIndex, setSelectedIndex] = useState(initialSelectedIndex);
-  const [keyboardNav, setKeyboardNav] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const [topGradientOpacity, setTopGradientOpacity] = useState(0);
   const [bottomGradientOpacity, setBottomGradientOpacity] = useState(1);
-  // const [selectedGenre, setSelectedGenre] = useState([]);
   const navigate = useNavigate();
+  const { setSelectedGenre } = useContext(ShopContext);
 
   const handleScroll = (e) => {
     const { scrollTop, scrollHeight, clientHeight } = e.target;
     setTopGradientOpacity(Math.min(scrollTop / 50, 1));
     const bottomDistance = scrollHeight - (scrollTop + clientHeight);
-    setBottomGradientOpacity(
-      scrollHeight <= clientHeight ? 0 : Math.min(bottomDistance / 50, 1)
-    );
+    setBottomGradientOpacity(scrollHeight <= clientHeight ? 0 : Math.min(bottomDistance / 50, 1));
   };
-  // sort
-  const { setSelectedGenre } = useContext(ShopContext);
-  // console.log(genres.genre);
 
-  // Keyboard Navigation
   useEffect(() => {
     if (!enableArrowNavigation) return;
     const handleKeyDown = (e) => {
       if (e.key === "ArrowDown" || (e.key === "Tab" && !e.shiftKey)) {
         e.preventDefault();
-        setKeyboardNav(true);
-        setSelectedIndex((prev) => Math.min(prev + 1, items.length - 1));
+        setSelectedIndex(prev => Math.min(prev + 1, items.length - 1));
       } else if (e.key === "ArrowUp" || (e.key === "Tab" && e.shiftKey)) {
         e.preventDefault();
-        setKeyboardNav(true);
-        setSelectedIndex((prev) => Math.max(prev - 1, 0));
-      } else if (e.key === "Enter") {
-        if (selectedIndex >= 0 && selectedIndex < items.length) {
-          e.preventDefault();
-          if (onItemSelect) {
-            onItemSelect(items[selectedIndex], selectedIndex);
-          }
-        }
+        setSelectedIndex(prev => Math.max(prev - 1, 0));
+      } else if (e.key === "Enter" && selectedIndex >= 0) {
+        e.preventDefault();
+        onItemSelect?.(items[selectedIndex], selectedIndex);
       }
     };
-
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [items, selectedIndex, onItemSelect, enableArrowNavigation]);
 
   return (
-    <div className="flex flex-col md:flex-row pt-5 items-start justify-between">
-      <div className="w-full md:w-1/3">
-        <div className="bg-[#202216] border  border-[#f2de9b] mb-5 mr-4 ml-3">
-          <div className="pl-4 text-xl font-semibold text-[#f2de9b]">
-            <ScrollFloat
-              animationDuration={1}
-              ease="back.inOut(2)"
-              scrollStart="center bottom+=50%"
-              scrollEnd="bottom bottom-=40%"
-              stagger={0.03}
-            >
-              Top Genres
+    <div className="flex flex-col md:flex-row pt-5 items-start justify-between px-4 md:px-8 pb-8">
+      {/* Genre list */}
+      <div className="w-full md:w-1/3 md:pr-4 mb-6 md:mb-0">
+        <div className="bg-[#1a1528] border border-purple-500/15 rounded-2xl overflow-hidden">
+          <div className="px-4 pt-4 pb-2 text-xl font-bold text-purple-200">
+            <ScrollFloat animationDuration={1} ease="back.inOut(2)" scrollStart="center bottom+=50%" scrollEnd="bottom bottom-=40%" stagger={0.03}>
+              Browse by Genre
             </ScrollFloat>
           </div>
           <div className={`relative ${className}`}>
-            <div
-              ref={listRef}
-              className="max-h-[400px] md:max-h-[730px] overflow-y-auto p-4 md:mb-4 no-scrollbar"
-              onScroll={handleScroll}
-              style={{ scrollbarWidth: "none" }}
-            >
+            <div ref={listRef}
+              className="max-h-[400px] md:max-h-[700px] overflow-y-auto p-3 no-scrollbar"
+              onScroll={handleScroll} style={{ scrollbarWidth: "none" }}>
               {items.map((item, index) => (
-                <AnimatedItem
-                  key={index}
-                  delay={0.1}
-                  index={index}
+                <AnimatedItem key={index} delay={0.05} index={index}
                   onMouseEnter={() => setSelectedIndex(index)}
-                  onClick={() => {
-                    setSelectedIndex(index);
-                    if (onItemSelect) {
-                      onItemSelect(item, index);
-                    }
-                  }}
-                >
+                  onClick={() => { setSelectedIndex(index); onItemSelect?.(item, index); }}>
                   <div
-                    className={`relative bg-[#111] rounded-lg ${
-                      selectedIndex === index ? "bg-[#222]" : ""
-                    } ${itemClassName}`}
-                    onClick={() => {
-                      setSelectedGenre(item.genre);
-                      navigate("/anime-genre");
-                    }}
+                    className={`relative rounded-xl overflow-hidden border transition-all ${
+                      selectedIndex === index
+                        ? "border-purple-500/40 shadow-[0_0_12px_rgba(242,222,155,0.15)]"
+                        : "border-transparent hover:border-purple-500/20"
+                    }`}
+                    onClick={() => { setSelectedGenre(item.genre); navigate("/anime-genre"); }}
                   >
-                    {/* Image */}
-                    <img
-                      src={item.image}
-                      alt=""
-                      className="w-full h-full max-h-32 hover:opacity-100 object-cover rounded-lg"
-                    />
-
-                    {/* Text Overlay */}
-                    <div className="absolute inset-0 flex items-center pl-4 rounded-lg">
-                      <p className="text-white">{item.genre}</p>
+                    <img src={item.image} alt={item.genre}
+                      className="w-full h-24 object-cover opacity-70 hover:opacity-100 transition-opacity" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent" />
+                    <div className="absolute inset-0 flex items-center pl-4">
+                      <p className="text-white font-bold text-sm">{item.genre}</p>
                     </div>
+                    {selectedIndex === index && (
+                      <motion.div layoutId="genre-indicator"
+                        className="absolute left-0 top-0 bottom-0 w-1 bg-purple-500 rounded-r-full" />
+                    )}
                   </div>
                 </AnimatedItem>
               ))}
             </div>
             {showGradients && (
               <>
-                <div
-                  className="absolute top-0 left-0 right-0 h-[50px] bg-gradient-to-b from-[#202216] to-transparent pointer-events-none transition-opacity duration-300 ease"
-                  style={{ opacity: topGradientOpacity }}
-                ></div>
-                <div
-                  className="absolute bottom-0 left-0 right-0 h-[100px] bg-gradient-to-t from-[#202216] to-transparent pointer-events-none transition-opacity duration-300 ease"
-                  style={{ opacity: bottomGradientOpacity }}
-                ></div>
+                <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-[#202216] to-transparent pointer-events-none transition-opacity duration-300"
+                  style={{ opacity: topGradientOpacity }} />
+                <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[#202216] to-transparent pointer-events-none transition-opacity duration-300"
+                  style={{ opacity: bottomGradientOpacity }} />
               </>
             )}
           </div>
         </div>
       </div>
-      {/* Genre Grid */}
-      <div className="w-full md:w-2/3 mb-4 md:mb-0">
-        {location.pathname.includes("manga") ? <MangaGrid /> : <AnimeGrid />}
-      </div>
 
-      {/* Genre List */}
+      {/* Grid */}
+      <div className="w-full md:w-2/3">
+        <div className="bg-[#1a1528] border border-purple-500/10 rounded-2xl p-4">
+          {location.pathname.includes("manga") ? <MangaGrid /> : <AnimeGrid />}
+        </div>
+      </div>
     </div>
   );
 };
